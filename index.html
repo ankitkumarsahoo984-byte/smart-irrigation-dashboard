@@ -1,0 +1,222 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Smart Farm | Irrigation Dashboard</title>
+
+    <!-- Connect CSS design -->
+    <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+
+    <header class="topbar">
+        <div class="brand">
+            <span class="logo">🌱</span>
+            <div>
+                <h1>SMART FARM</h1>
+                <p>IoT IRRIGATION SYSTEM</p>
+            </div>
+        </div>
+
+        <div class="connection">
+            <span class="dot"></span>
+            <span>DEMO MODE</span>
+        </div>
+    </header>
+
+    <main class="container">
+
+                <section class="welcome">
+            <div>
+                <h2>Monitoring Dashboard</h2>
+                <p>Monitor your farm and irrigation system.</p>
+                <p id="lastUpdate">Last data update: Waiting...</p>
+            </div>
+            <div class="date" id="liveDateTime">Loading date...</div>
+        </section>
+
+        <!-- SENSOR DASHBOARD -->
+        <section class="dashboard">
+
+            <div class="card">
+                <div class="card-top">
+                    <h3>Soil Moisture</h3>
+                    <span>💧</span>
+                </div>
+               <p class="value" id="moisture">--%</p>
+
+<div class="moisture-bar">
+    <div class="moisture-fill" id="moistureFill"></div>
+</div>
+
+<p class="description">Soil water level</p>
+            </div>
+
+            <div class="card">
+                <div class="card-top">
+                    <h3>Temperature</h3>
+                    <span>🌡️</span>
+                </div>
+                <p class="value" id="temperature">-- °C</p>
+                <p class="description">Air temperature</p>
+            </div>
+
+            <div class="card">
+                <div class="card-top">
+                    <h3>Humidity</h3>
+                    <span>☁️</span>
+                </div>
+                <p class="value" id="humidity">--%</p>
+                <p class="description">Air humidity</p>
+            </div>
+
+            <div class="card">
+                <div class="card-top">
+                    <h3>Battery Level</h3>
+                    <span>🔋</span>
+                </div>
+                <p class="value" id="battery">--%</p>
+                <div class="battery-bar">
+    <div class="battery-fill" id="batteryFill"></div>
+</div>
+                <p class="description">Battery charge</p>
+            </div>
+
+            <div class="card">
+                <div class="card-top">
+                    <h3>Water Flow</h3>
+                    <span>🚰</span>
+                </div>
+                <p class="value" id="flow">-- L/min</p>
+                <div class="flow-indicator" id="flowIndicator">
+    <span class="flow-dot"></span>
+    <span id="flowStatus">NO WATER FLOW</span>
+</div>
+                <p class="description">Current flow rate</p>
+            </div>
+
+            <div class="card">
+                <div class="card-top">
+                    <h3>Total Water Used</h3>
+                    <span>🌊</span>
+                </div>
+                <p class="value" id="waterUsed">-- L</p>
+                <p class="description">Total consumption</p>
+            </div>
+
+        </section>
+
+        <!-- HISTORICAL GRAPHS -->
+        <section class="charts-section">
+            <h2>Historical Sensor Data</h2>
+            <p>Sample readings over time</p>
+
+            <div class="chart-card">
+                <h3>Soil Moisture History</h3>
+                <canvas id="moistureChart"></canvas>
+            </div>
+
+            <div class="chart-card">
+                <h3>Temperature History</h3>
+                <canvas id="temperatureChart"></canvas>
+            </div>
+        </section>
+
+        <!-- WATER PUMP CONTROL -->
+        <section class="control-panel">
+            <h2>Water Pump Control</h2>
+            <p>Select how you want to operate irrigation.</p>
+
+            <div class="mode-buttons">
+                <button class="auto-button" onclick="setAutoMode()">
+                    AUTO MODE
+                </button>
+
+                <button class="manual-button" onclick="setManualMode()">
+                    MANUAL MODE
+                </button>
+            </div>
+
+            <p id="modeStatus">Current Mode: MANUAL</p>
+
+            <div class="threshold-settings">
+                <h3>Soil Moisture Settings</h3>
+
+                <label for="onThreshold">Pump ON below (%)</label>
+                <input type="number" id="onThreshold" value="30" min="0" max="100">
+
+                <label for="offThreshold">Pump OFF above (%)</label>
+                <input type="number" id="offThreshold" value="65" min="0" max="100">
+            </div>
+
+            <div class="pump-status">
+                <span id="pumpStatus">PUMP OFF (DEMO)</span>
+            </div>
+
+            <div class="buttons">
+                <button class="on-button" onclick="pumpOn()">PUMP ON</button>
+                <button class="off-button" onclick="pumpOff()">PUMP OFF</button>
+            </div>
+        </section>
+
+        <!-- SYSTEM INFORMATION -->
+        <section class="system-panel">
+            <h2>System Information</h2>
+
+            <div class="system-row">
+                <span>ESP32 Connection</span>
+                <strong id="espStatus">Not Connected</strong>
+            </div>
+
+            <div class="system-row">
+                <span>Operating Mode</span>
+                <strong>Demo Mode</strong>
+            </div>
+
+            <div class="system-row">
+                <span>Data Source</span>
+                <strong>Sample Data</strong>
+            </div>
+        </section>
+
+        <!-- SYSTEM ALERTS -->
+        <section class="alerts-panel">
+            <h2>System Alerts</h2>
+            <p>Important notifications about your irrigation system.</p>
+
+            <div class="alert-test-buttons">
+                <h3>Alert Testing (DEMO)</h3>
+
+                <button onclick="testLowBattery()">Test Low Battery</button>
+                <button onclick="testDrySoil()">Test Dry Soil</button>
+                <button onclick="testNoFlow()">Test No Water Flow</button>
+                <button onclick="testLongRunning()">Test Pump Runtime</button>
+                <button class="off-button" onclick="resetAlertTest()">Reset Tests</button>
+            </div>
+
+            <div id="alertList">
+                <div class="alert-item normal">
+                    <span>✓</span>
+                    <p>System operating normally (DEMO)</p>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            Smart Farm IoT Project | College Project Dashboard
+        </footer>
+
+    </main>
+
+    <!-- Chart library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Connect JavaScript -->
+    <script src="./script.js"></script>
+
+</body>
+</html>

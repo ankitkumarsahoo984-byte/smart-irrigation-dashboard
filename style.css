@@ -1,0 +1,603 @@
+
+/* SMART FARM - NATURE THEME */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #edf5e9;
+    color: #263b2d;
+}
+
+/* HEADER */
+
+.topbar {
+    background: linear-gradient(120deg, #174b32, #367c4b);
+    color: white;
+    padding: 22px 6%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.logo {
+    font-size: 42px;
+}
+
+.brand h1 {
+    font-size: 23px;
+    letter-spacing: 2px;
+}
+
+.brand p {
+    font-size: 11px;
+    color: #d4ead5;
+    margin-top: 5px;
+    letter-spacing: 1px;
+}
+
+.connection {
+    background: #285e3e;
+    padding: 11px 17px;
+    border-radius: 30px;
+    font-size: 12px;
+}
+
+.dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    background: #a3e635;
+    border-radius: 50%;
+    margin-right: 7px;
+}
+
+/* MAIN AREA */
+
+.container {
+    width: 90%;
+    max-width: 1250px;
+    margin: 35px auto;
+}
+
+.welcome {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 28px;
+}
+
+.welcome h2 {
+    font-size: 28px;
+    color: #174b32;
+    margin-bottom: 8px;
+}
+
+.welcome p {
+    color: #718276;
+}
+
+.date {
+    color: #367c4b;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* SENSOR CARDS */
+
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+}
+
+.card {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 18px;
+    border: 1px solid #dcebd9;
+    box-shadow: 0 5px 18px rgba(38, 80, 46, 0.07);
+    transition: 0.25s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(38, 80, 46, 0.13);
+}
+
+.card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card h3 {
+    color: #718276;
+    font-size: 15px;
+}
+
+.card-top span {
+    font-size: 27px;
+}
+
+.value {
+    font-size: 35px;
+    font-weight: 700;
+    color: #287044;
+    margin-top: 22px;
+}
+
+.description {
+    color: #9aa99d;
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+/* COMMON PANELS */
+
+.control-panel,
+.system-panel,
+.charts-section,
+.alerts-panel {
+    background: #ffffff;
+    padding: 28px;
+    border-radius: 18px;
+    margin-top: 28px;
+    border: 1px solid #dcebd9;
+    box-shadow: 0 5px 18px rgba(38, 80, 46, 0.06);
+}
+
+.control-panel h2,
+.system-panel h2,
+.charts-section h2,
+.alerts-panel h2 {
+    color: #174b32;
+    margin-bottom: 10px;
+}
+
+/* CHARTS */
+
+.charts-section > p {
+    color: #718276;
+    margin-bottom: 20px;
+}
+
+.chart-card {
+    margin-top: 22px;
+    padding: 20px;
+    background: #f8fbf6;
+    border: 1px solid #e1ecde;
+    border-radius: 14px;
+}
+
+.chart-card h3 {
+    color: #42634b;
+    margin-bottom: 15px;
+}
+
+/* FIXED CHART HEIGHT */
+
+.chart-card {
+    position: relative;
+    height: 340px;
+    width: 100%;
+}
+
+.chart-card canvas {
+    width: 100% !important;
+    height: 260px !important;
+}
+
+/* BUTTONS */
+
+button {
+    padding: 13px 23px;
+    border: none;
+    border-radius: 9px;
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+    margin-right: 8px;
+    margin-top: 10px;
+    transition: 0.2s;
+}
+
+button:hover {
+    opacity: 0.85;
+    transform: translateY(-2px);
+}
+
+.on-button {
+    background: #287044;
+}
+
+.off-button {
+    background: #c0392b;
+}
+
+.auto-button {
+    background: #367c4b;
+}
+
+.manual-button {
+    background: #82917f;
+}
+
+/* PUMP CONTROL */
+
+.mode-buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+#modeStatus {
+    margin-top: 20px;
+    font-weight: bold;
+    color: #367c4b;
+}
+
+.threshold-settings {
+    margin-top: 22px;
+    padding: 22px;
+    background: #f1f7ed;
+    border-radius: 13px;
+}
+
+.threshold-settings h3 {
+    margin-bottom: 15px;
+    color: #174b32;
+}
+
+.threshold-settings label {
+    display: block;
+    margin-top: 14px;
+    color: #526c58;
+}
+
+.threshold-settings input {
+    width: 100%;
+    max-width: 220px;
+    padding: 11px;
+    margin-top: 7px;
+    border: 1px solid #cbdcc8;
+    border-radius: 7px;
+}
+
+/* SYSTEM INFORMATION */
+
+.system-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 17px 0;
+    border-bottom: 1px solid #e4eee1;
+    gap: 15px;
+}
+
+.system-row strong {
+    font-size: 13px;
+    color: #287044;
+}
+
+/* ALERTS */
+
+.alerts-panel > p {
+    color: #718276;
+    margin-top: 8px;
+    margin-bottom: 20px;
+}
+
+.alert-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 12px;
+}
+
+.alert-item p {
+    font-size: 14px;
+}
+
+.alert-item.normal {
+    background: #e2f3df;
+    color: #28643b;
+}
+
+.alert-item.warning {
+    background: #fff2cc;
+    color: #956515;
+}
+
+.alert-item.danger {
+    background: #fce3df;
+    color: #a52e25;
+}
+
+/* FOOTER */
+
+footer {
+    text-align: center;
+    color: #819586;
+    padding: 35px 10px;
+    font-size: 12px;
+}
+
+/* MOISTURE PROGRESS BAR */
+
+.moisture-bar {
+    width: 100%;
+    height: 12px;
+    background: #e1ecde;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-top: 15px;
+}
+
+.moisture-fill {
+    width: 42%;
+    height: 100%;
+    background: #287044;
+    border-radius: 20px;
+    transition: width 0.5s ease;
+}
+
+.moisture-fill.dry {
+    background: #dc2626;
+}
+
+.moisture-fill.medium {
+    background: #f59e0b;
+}
+
+.moisture-fill.good {
+    background: #16a34a;
+}
+
+/* BATTERY PROGRESS BAR */
+
+.battery-bar {
+    width: 100%;
+    height: 12px;
+    background: #e1ecde;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-top: 15px;
+}
+
+.battery-fill {
+    width: 85%;
+    height: 100%;
+    background: #16a34a;
+    border-radius: 20px;
+    transition: width 0.5s ease;
+}
+
+.battery-fill.low {
+    background: #dc2626;
+}
+
+.battery-fill.medium {
+    background: #f59e0b;
+}
+
+.battery-fill.good {
+    background: #16a34a;
+}
+
+/* WATER FLOW INDICATOR */
+
+.flow-indicator {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 16px;
+    padding: 10px;
+    background: #f1f7ed;
+    border-radius: 9px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #718276;
+}
+
+.flow-dot {
+    width: 10px;
+    height: 10px;
+    background: #dc2626;
+    border-radius: 50%;
+}
+
+.flow-indicator.active {
+    color: #15803d;
+    background: #e2f3df;
+}
+
+.flow-indicator.active .flow-dot {
+    background: #16a34a;
+    animation: flowPulse 1s infinite;
+}
+
+@keyframes flowPulse {
+    50% {
+        opacity: 0.3;
+        transform: scale(1.4);
+    }
+}
+
+/* PUMP STATUS INDICATOR */
+
+.pump-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 20px;
+    border-radius: 30px;
+    background: #fce3df;
+    color: #dc2626;
+    font-size: 14px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.pump-status.running {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+/* MOBILE DESIGN */
+
+@media (max-width: 850px) {
+    .dashboard {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 550px) {
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .topbar {
+        padding: 18px;
+    }
+
+    .brand h1 {
+        font-size: 18px;
+    }
+
+    .connection {
+        font-size: 10px;
+        padding: 9px;
+    }
+
+    .welcome {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .welcome h2 {
+        font-size: 23px;
+    }
+
+    .container {
+        width: 94%;
+        margin: 22px auto;
+    }
+
+    .control-panel,
+    .system-panel,
+    .charts-section,
+    .alerts-panel {
+        padding: 19px;
+    }
+
+    .system-row {
+        font-size: 13px;
+    }
+
+    button {
+        padding: 11px 15px;
+        font-size: 12px;
+    }
+
+    .chart-card {
+        height: 300px;
+        padding: 14px;
+    }
+
+    .chart-card canvas {
+        height: 230px !important;
+    }
+}
+
+/* =================================
+   MOBILE RESPONSIVE DESIGN
+   ================================= */
+
+@media screen and (max-width: 768px) {
+
+    body {
+        font-size: 14px;
+        padding: 0;
+    }
+
+    .topbar {
+        padding: 15px;
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+
+    .dashboard,
+    .container,
+    main {
+        width: 100%;
+        padding: 12px;
+    }
+
+    .stats-grid,
+    .sensor-grid,
+    .cards-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .card,
+    .sensor-card,
+    .chart-card {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .chart-card {
+        height: 300px;
+        padding: 12px;
+    }
+
+    .chart-card canvas {
+        max-width: 100%;
+    }
+
+    button {
+        max-width: 100%;
+        padding: 10px 14px;
+    }
+
+    input,
+    select {
+        max-width: 100%;
+    }
+}
+
+@media screen and (max-width: 420px) {
+
+    .stats-grid,
+    .sensor-grid,
+    .cards-grid {
+        grid-template-columns: 1fr;
+    }
+
+    h1 {
+        font-size: 23px;
+    }
+
+    h2 {
+        font-size: 19px;
+    }
+
+    .chart-card {
+        height: 270px;
+    }
+}
