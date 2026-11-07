@@ -441,33 +441,10 @@ function connectButtons() {
         }
     });
 }
-    const buttons = [
-        ["autoModeButton", setAutoMode],
-        ["manualModeButton", setManualMode],
-        ["pumpOnButton", pumpOn],
-        ["pumpOffButton", pumpOff],
-        ["lowBatteryButton", testLowBattery],
-        ["drySoilButton", testDrySoil],
-        ["noFlowButton", testNoFlow],
-        ["runtimeButton", testLongRunning],
-        ["resetAlertsButton", resetAlertTest]
-    ];
-
-    buttons.forEach(([id, action]) => {
-        const button = document.getElementById(id);
-
-        if (button) {
-            button.addEventListener("click", action);
-        } else {
-            console.warn("Button not found:", id);
-        }
-    });
-}
 
 // ==========================================
 // DATE AND TIME
 // ==========================================
-
 function updateDateTime() {
     document.getElementById("liveDateTime").textContent =
         new Date().toLocaleString("en-IN", {
