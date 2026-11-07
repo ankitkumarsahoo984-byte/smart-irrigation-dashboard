@@ -126,38 +126,42 @@
             </div>
         </section>
 
-        <!-- WATER PUMP CONTROL -->
-        <section class="control-panel">
-            <h2>Water Pump Control</h2>
-            <p>Select how you want to operate irrigation.</p>
+     <!-- WATER PUMP CONTROL -->
+<section class="control-panel">
+    <h2>Water Pump Control</h2>
+    <p>Select how you want to operate irrigation.</p>
 
-            <div class="mode-buttons">
-                <button class="on-button" id="pumpOnButton">PUMP ON</button>
-<button class="off-button" id="pumpOffButton">PUMP OFF</button>
-            </div>
+    <div class="mode-buttons">
+        <button class="auto-button" id="autoModeButton">
+            AUTO MODE
+        </button>
 
-            <p id="modeStatus">Current Mode: MANUAL</p>
+        <button class="manual-button" id="manualModeButton">
+            MANUAL MODE
+        </button>
+    </div>
 
-            <div class="threshold-settings">
-                <h3>Soil Moisture Settings</h3>
+    <p id="modeStatus">Current Mode: MANUAL</p>
 
-                <label for="onThreshold">Pump ON below (%)</label>
-                <input type="number" id="onThreshold" value="30" min="0" max="100">
+    <div class="threshold-settings">
+        <h3>Soil Moisture Settings</h3>
 
-                <label for="offThreshold">Pump OFF above (%)</label>
-                <input type="number" id="offThreshold" value="65" min="0" max="100">
-            </div>
+        <label for="onThreshold">Pump ON below (%)</label>
+        <input type="number" id="onThreshold" value="30" min="0" max="100">
 
-            <div class="pump-status">
-                <span id="pumpStatus">PUMP OFF (DEMO)</span>
-            </div>
+        <label for="offThreshold">Pump OFF above (%)</label>
+        <input type="number" id="offThreshold" value="65" min="0" max="100">
+    </div>
 
-            <div class="buttons">
-                <button class="on-button" onclick="pumpOn()">PUMP ON</button>
-                <button class="off-button" onclick="pumpOff()">PUMP OFF</button>
-            </div>
-        </section>
+    <div class="pump-status">
+        <span id="pumpStatus">PUMP OFF (DEMO)</span>
+    </div>
 
+    <div class="buttons">
+        <button class="on-button" id="pumpOnButton">PUMP ON</button>
+        <button class="off-button" id="pumpOffButton">PUMP OFF</button>
+    </div>
+</section>
         <!-- SYSTEM INFORMATION -->
         <section class="system-panel">
             <h2>System Information</h2>
