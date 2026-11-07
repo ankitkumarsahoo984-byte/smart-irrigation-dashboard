@@ -428,6 +428,23 @@ function connectButtons() {
         ["autoModeButton", setAutoMode],
         ["manualModeButton", setManualMode],
         ["pumpOnButton", pumpOn],
+        ["pumpOffButton", pumpOff]
+    ];
+
+    buttons.forEach(([id, action]) => {
+        const button = document.getElementById(id);
+
+        if (button) {
+            button.addEventListener("click", action);
+        } else {
+            console.warn("Button not found:", id);
+        }
+    });
+}
+    const buttons = [
+        ["autoModeButton", setAutoMode],
+        ["manualModeButton", setManualMode],
+        ["pumpOnButton", pumpOn],
         ["pumpOffButton", pumpOff],
         ["lowBatteryButton", testLowBattery],
         ["drySoilButton", testDrySoil],
