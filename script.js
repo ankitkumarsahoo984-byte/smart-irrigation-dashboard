@@ -771,7 +771,7 @@ function saveHistory() {
     updateCharts();
 }
 
-SAVE SENSOR READINGS TO FIREBASE
+// SAVE SENSOR READINGS TO FIREBASE
 // ==========================================
 // CREATE CHARTS
 // ==========================================
