@@ -28,12 +28,18 @@ const database = getDatabase(firebaseApp);
 // ==========================================
 
 // SENSOR VALUES
-let moisture = 36;
-let temperature = 27.9;
-let humidity = 68;
-let battery = 85;
-let flow = 0;
-let waterUsed = 12;
+let moisture = null;
+let temperature = null;
+let humidity = null;
+let battery = null;
+let flow = null;
+let waterUsed = null;
+
+// ESP32 CONNECTION
+let esp32Connected = false;
+let wifiName = "Not Connected";
+let wifiSignal = null;
+let lastHeartbeat = null;
 
 // PUMP SETTINGS
 let currentMode = "AUTO";
@@ -111,59 +117,84 @@ function saveHistoryToStorage() {
     }
 }
 
+
 // ==========================================
 // DISPLAY SENSOR READINGS
 // ==========================================
 
 function displayReadings() {
+
+    // SOIL MOISTURE
     document.getElementById("moisture").textContent =
-        Math.round(moisture) + "%";
+        Number.isFinite(moisture) ? Math.round(moisture) + "%" : "--";
 
+    // TEMPERATURE
     document.getElementById("temperature").textContent =
-        temperature.toFixed(1) + " °C";
+        Number.isFinite(temperature) ? temperature.toFixed(1) + " °C" : "-- °C";
 
+    // HUMIDITY
     document.getElementById("humidity").textContent =
-        Math.round(humidity) + "%";
+        Number.isFinite(humidity) ? Math.round(humidity) + "%" : "--";
 
+    // BATTERY
     document.getElementById("battery").textContent =
-        Math.round(battery) + "%";
+        Number.isFinite(battery) ? Math.round(battery) + "%" : "--";
 
+    // WATER FLOW
     document.getElementById("flow").textContent =
-        flow.toFixed(1) + " L/min";
+        Number.isFinite(flow) ? flow.toFixed(1) + " L/min" : "-- L/min";
 
+    // TOTAL WATER USED
     document.getElementById("waterUsed").textContent =
-        waterUsed.toFixed(1) + " L";
+        Number.isFinite(waterUsed) ? waterUsed.toFixed(1) + " L" : "-- L";
 
+
+    // MOISTURE PROGRESS BAR
     const moistureFill = document.getElementById("moistureFill");
 
-    moistureFill.style.width = moisture + "%";
+    moistureFill.style.width =
+        Number.isFinite(moisture) ? moisture + "%" : "0%";
+
     moistureFill.className = "moisture-fill";
 
-    if (moisture < 30) {
-        moistureFill.classList.add("dry");
-    } else if (moisture < 60) {
-        moistureFill.classList.add("medium");
-    } else {
-        moistureFill.classList.add("good");
+    if (Number.isFinite(moisture)) {
+        if (moisture < 30) {
+            moistureFill.classList.add("dry");
+        } else if (moisture < 60) {
+            moistureFill.classList.add("medium");
+        } else {
+            moistureFill.classList.add("good");
+        }
     }
 
+
+    // BATTERY PROGRESS BAR
     const batteryFill = document.getElementById("batteryFill");
 
-    batteryFill.style.width = battery + "%";
+    batteryFill.style.width =
+        Number.isFinite(battery) ? battery + "%" : "0%";
+
     batteryFill.className = "battery-fill";
 
-    if (battery < 20) {
-        batteryFill.classList.add("low");
-    } else if (battery < 50) {
-        batteryFill.classList.add("medium");
-    } else {
-        batteryFill.classList.add("good");
+    if (Number.isFinite(battery)) {
+        if (battery < 20) {
+            batteryFill.classList.add("low");
+        } else if (battery < 50) {
+            batteryFill.classList.add("medium");
+        } else {
+            batteryFill.classList.add("good");
+        }
     }
 
+
+    // WATER FLOW STATUS
     const flowIndicator = document.getElementById("flowIndicator");
     const flowStatus = document.getElementById("flowStatus");
 
-    if (flow > 0) {
+    if (!Number.isFinite(flow)) {
+        flowIndicator.classList.remove("active");
+        flowStatus.textContent = "WAITING FOR DATA";
+    } else if (flow > 0) {
         flowIndicator.classList.add("active");
         flowStatus.textContent = "WATER FLOWING";
     } else {
@@ -172,47 +203,127 @@ function displayReadings() {
     }
 }
 
-// LISTEN FOR FIREBASE SENSOR DATA
-// LISTEN FOR FIREBASE SENSOR DATA AND LOAD CLOUD HISTORY
-function listenToFirebase() {
-    const sensorRef = ref(database, "sensorHistory");
 
-    onValue(sensorRef, (snapshot) => {
+
+// ==========================================
+// LISTEN FOR REAL ESP32 DATA FROM FIREBASE
+// ==========================================
+
+function listenToFirebase() {
+
+    // Helper: convert valid sensor values into numbers
+    function getNumber(value) {
+        if (value === null || value === undefined || value === "") {
+            return null;
+        }
+
+        const number = Number(value);
+        return Number.isFinite(number) ? number : null;
+    }
+
+    // 1. LISTEN FOR LIVE SENSOR READINGS
+    const liveRef = ref(database, "liveData");
+
+    onValue(liveRef, (snapshot) => {
+
         if (!snapshot.exists()) {
-            console.log("No Firebase sensor data found.");
+            moisture = null;
+            temperature = null;
+            humidity = null;
+            battery = null;
+            flow = null;
+            waterUsed = null;
+
+            displayReadings();
             return;
         }
 
-        const readings = snapshot.val();
+      const data = snapshot.val();
 
-        // Sort readings by timestamp (oldest to newest)
-        const sortedReadings = Object.values(readings).sort(
-            (a, b) => Number(a.timestamp) - Number(b.timestamp)
-        );
+// UPDATE LAST SENSOR READING TIME
+updateLastDataTime(getNumber(data.timestamp));
 
-        // Get the latest reading
-        const latestData = sortedReadings[sortedReadings.length - 1];
+moisture = getNumber(data.moisture);
+temperature = getNumber(data.temperature);
+humidity = getNumber(data.humidity);
+battery = getNumber(data.battery);
+flow = getNumber(data.flow);
+waterUsed = getNumber(data.waterUsed);
 
-        // Update dashboard sensor values
-        moisture = Number(latestData.moisture);
-        temperature = Number(latestData.temperature);
-        humidity = Number(latestData.humidity);
-        battery = Number(latestData.battery);
-        flow = Number(latestData.flow);
-        waterUsed = Number(latestData.waterUsed);
+        if (data.pumpStatus === "ON" || data.pumpStatus === "OFF") {
+            pumpIsOn = data.pumpStatus === "ON";
+        }
 
-        pumpIsOn = latestData.pumpStatus === "ON";
-        currentMode = latestData.mode || currentMode;
+        if (data.mode === "AUTO" || data.mode === "MANUAL") {
+            currentMode = data.mode;
+        }
 
-        // Clear old chart data
+        displayReadings();
+        updatePumpStatus();
+
+        const modeElement = document.getElementById("systemMode");
+
+        if (modeElement) {
+            modeElement.textContent = currentMode;
+        }
+
+        console.log("Firebase: Live ESP32 data received!");
+    });
+
+
+    // 2. LISTEN FOR ESP32 CONNECTION AND WI-FI STATUS
+    const deviceRef = ref(database, "deviceStatus");
+
+    onValue(deviceRef, (snapshot) => {
+
+        if (!snapshot.exists()) {
+            esp32Connected = false;
+            wifiName = "Not Connected";
+            wifiSignal = null;
+            lastHeartbeat = null;
+
+        } else {
+            const device = snapshot.val();
+
+            wifiName = device.ssid || "Unknown";
+            wifiSignal = getNumber(device.rssi);
+            lastHeartbeat = getNumber(device.lastHeartbeat);
+        }
+
+        updateDeviceStatus();
+    });
+
+
+    // 3. LISTEN FOR REAL ESP32 HISTORY
+    const historyRef = ref(database, "sensorHistory");
+
+    onValue(historyRef, (snapshot) => {
+
         timeLabels.length = 0;
         moistureHistory.length = 0;
         temperatureHistory.length = 0;
 
-        // Load the latest 20 Firebase readings
-        const recentReadings = sortedReadings.slice(-MAX_HISTORY);
+        if (!snapshot.exists()) {
+            updateCharts();
+            console.log("No ESP32 history available yet.");
+            return;
+        }
 
-        recentReadings.forEach((reading) => {
+        const readings = Object.values(snapshot.val());
+
+        // Only accept readings marked as ESP32 data
+        const realReadings = readings
+            .filter(reading =>
+                reading.source === "ESP32" &&
+                getNumber(reading.timestamp) !== null
+            )
+            .sort((a, b) =>
+                Number(a.timestamp) - Number(b.timestamp)
+            )
+            .slice(-MAX_HISTORY);
+
+        realReadings.forEach((reading) => {
+
             const time = new Date(Number(reading.timestamp));
 
             timeLabels.push(
@@ -223,97 +334,236 @@ function listenToFirebase() {
                 })
             );
 
-            moistureHistory.push(Number(reading.moisture));
-            temperatureHistory.push(Number(reading.temperature));
+            moistureHistory.push(getNumber(reading.moisture));
+            temperatureHistory.push(getNumber(reading.temperature));
         });
 
-        // Refresh dashboard and charts
-        displayReadings();
-        updatePumpStatus();
         updateCharts();
 
-        console.log("Firebase: Cloud history and dashboard updated!");
+        console.log("Firebase: Real ESP32 history updated!");
     });
+
+
+    // 4. CHECK WHETHER ESP32 HEARTBEAT IS STILL ACTIVE
+    function updateDeviceStatus() {
+
+        const now = Date.now();
+
+        esp32Connected =
+            Number.isFinite(lastHeartbeat) &&
+            now - lastHeartbeat >= 0 &&
+            now - lastHeartbeat < 15000;
+
+        const statusText = document.getElementById("espStatus");
+        const headerText = document.getElementById("connectionText");
+        const wifiElement = document.getElementById("wifiName");
+        const signalElement = document.getElementById("wifiSignal");
+        const heartbeatElement = document.getElementById("lastHeartbeat");
+        const modeElement = document.getElementById("systemMode");
+        const sourceElement = document.getElementById("dataSource");
+
+        if (statusText) {
+            statusText.textContent =
+                esp32Connected ? "Connected" : "Disconnected";
+        }
+
+        if (headerText) {
+            headerText.textContent =
+                esp32Connected ? "ESP32 CONNECTED" : "ESP32 DISCONNECTED";
+        }
+
+        if (wifiElement) {
+            wifiElement.textContent =
+                esp32Connected ? wifiName : "Not Connected";
+        }
+
+        if (signalElement) {
+            signalElement.textContent =
+                esp32Connected && Number.isFinite(wifiSignal)
+                    ? wifiSignal + " dBm"
+                    : "-- dBm";
+        }
+
+        if (heartbeatElement) {
+            heartbeatElement.textContent =
+                Number.isFinite(lastHeartbeat)
+                    ? new Date(lastHeartbeat).toLocaleString("en-IN")
+                    : "Waiting...";
+        }
+
+        if (modeElement) {
+            modeElement.textContent = currentMode;
+        }
+
+        if (sourceElement) {
+            sourceElement.textContent =
+                esp32Connected ? "ESP32 Live Data" : "No Live Data";
+        }
+
+        const connectionDot = document.getElementById("connectionDot");
+
+        if (connectionDot) {
+            connectionDot.classList.toggle("online", esp32Connected);
+            connectionDot.classList.toggle("offline", !esp32Connected);
+        }
+        
+        updatePumpStatus();
+        
+    }
+
+    // Refresh connection status every 5 seconds
+    setInterval(updateDeviceStatus, 5000);
 }
+
+
 
 // ==========================================
 // PUMP STATUS
 // ==========================================
 
 function updatePumpStatus() {
+
     const status = document.getElementById("pumpStatus");
     const statusBox = status.parentElement;
 
+    statusBox.classList.remove("running");
+
+    if (!esp32Connected) {
+        status.textContent = "PUMP STATUS UNKNOWN";
+        return;
+    }
+
     if (pumpIsOn) {
-        status.textContent = "PUMP ON (DEMO)";
+        status.textContent = "PUMP ON";
         statusBox.classList.add("running");
     } else {
-        status.textContent = "PUMP OFF (DEMO)";
-        statusBox.classList.remove("running");
+        status.textContent = "PUMP OFF";
     }
 }
+
+
 
 // ==========================================
 // PUMP ON / OFF
 // ==========================================
 
-function pumpOn() {
-    currentMode = "MANUAL";
-    pumpIsOn = true;
+async function pumpOn() {
 
-    document.getElementById("modeStatus").textContent =
-        "Current Mode: MANUAL";
+    if (!esp32Connected) {
+        alert("ESP32 is disconnected. Pump command not sent.");
+        return;
+    }
 
-    updatePumpStatus();
-    displayReadings();
-    updateAlerts();
+    try {
+        await set(ref(database, "commands/pump"), "ON");
+        await set(ref(database, "commands/mode"), "MANUAL");
+
+        currentMode = "MANUAL";
+
+        document.getElementById("modeStatus").textContent =
+            "Current Mode: MANUAL";
+
+        console.log("Pump ON command sent to ESP32.");
+
+    } catch (error) {
+        console.error("Pump ON command failed:", error);
+        alert("Unable to send pump command.");
+    }
 }
 
-function pumpOff() {
-    currentMode = "MANUAL";
-    pumpIsOn = false;
-    flow = 0;
 
-    document.getElementById("modeStatus").textContent =
-        "Current Mode: MANUAL";
+async function pumpOff() {
 
-    updatePumpStatus();
-    displayReadings();
-    updateAlerts();
+    if (!esp32Connected) {
+        alert("ESP32 is disconnected. Pump command not sent.");
+        return;
+    }
+
+    try {
+        await set(ref(database, "commands/pump"), "OFF");
+        await set(ref(database, "commands/mode"), "MANUAL");
+
+        currentMode = "MANUAL";
+
+        document.getElementById("modeStatus").textContent =
+            "Current Mode: MANUAL";
+
+        console.log("Pump OFF command sent to ESP32.");
+
+    } catch (error) {
+        console.error("Pump OFF command failed:", error);
+        alert("Unable to send pump command.");
+    }
 }
+
 
 // ==========================================
 // AUTO / MANUAL MODE
 // ==========================================
 
-function setAutoMode() {
-    currentMode = "AUTO";
+async function setAutoMode() {
 
-    document.getElementById("modeStatus").textContent =
-        "Current Mode: AUTOMATIC";
+    if (!esp32Connected) {
+        alert("ESP32 is disconnected. Cannot change operating mode.");
+        return;
+    }
 
-    checkAutomaticIrrigation();
+    try {
+        await set(ref(database, "commands/mode"), "AUTO");
 
-    updatePumpStatus();
-    displayReadings();
-    updateAlerts();
+        currentMode = "AUTO";
+
+        document.getElementById("modeStatus").textContent =
+            "Current Mode: AUTOMATIC";
+
+        console.log("AUTO mode command sent to ESP32.");
+
+    } catch (error) {
+        console.error("AUTO mode command failed:", error);
+        alert("Unable to send AUTO mode command.");
+    }
 }
 
-function setManualMode() {
-    currentMode = "MANUAL";
 
-    document.getElementById("modeStatus").textContent =
-        "Current Mode: MANUAL";
+async function setManualMode() {
 
-    updatePumpStatus();
+    if (!esp32Connected) {
+        alert("ESP32 is disconnected. Cannot change operating mode.");
+        return;
+    }
+
+    try {
+        await set(ref(database, "commands/mode"), "MANUAL");
+
+        currentMode = "MANUAL";
+
+        document.getElementById("modeStatus").textContent =
+            "Current Mode: MANUAL";
+
+        console.log("MANUAL mode command sent to ESP32.");
+
+    } catch (error) {
+        console.error("MANUAL mode command failed:", error);
+        alert("Unable to send MANUAL mode command.");
+    }
 }
+
+
 
 // ==========================================
 // AUTOMATIC IRRIGATION
 // ==========================================
 
 function checkAutomaticIrrigation() {
+
+    // Do not operate without a connected ESP32
+    if (!esp32Connected) return;
+
+    // Automatic mode only
     if (currentMode !== "AUTO") return;
+
+    // Do not operate without a valid moisture reading
+    if (!Number.isFinite(moisture)) return;
 
     const onThreshold =
         Number(document.getElementById("onThreshold").value);
@@ -321,6 +571,7 @@ function checkAutomaticIrrigation() {
     const offThreshold =
         Number(document.getElementById("offThreshold").value);
 
+    // Validate thresholds
     if (
         !Number.isFinite(onThreshold) ||
         !Number.isFinite(offThreshold) ||
@@ -340,56 +591,65 @@ function checkAutomaticIrrigation() {
     }
 }
 
+
 // ==========================================
-// SYSTEM ALERTS
+// UPDATE SYSTEM ALERTS
 // ==========================================
 
 function updateAlerts() {
+
     const alertBox = document.getElementById("alertList");
 
     if (!alertBox) return;
 
     let messages = [];
 
-    if (battery < 20 || alertTest === "battery") {
-        messages.push(`
-            <div class="alert-item danger">
-                <p>⚠ Low battery warning!</p>
-            </div>
-        `);
+    // Battery alert
+    if (
+        (Number.isFinite(battery) && battery < 20) ||
+        alertTest === "battery"
+    ) {
+        messages.push("⚠️ Low battery level!");
     }
 
-    if (moisture < 30 || alertTest === "dry") {
-        messages.push(`
-            <div class="alert-item warning">
-                <p>💧 Soil moisture is too low!</p>
-            </div>
-        `);
+    // Dry soil alert
+    if (
+        (Number.isFinite(moisture) && moisture < 30) ||
+        alertTest === "dry"
+    ) {
+        messages.push("⚠️ Soil moisture is low!");
     }
 
-    if ((pumpIsOn && flow === 0) || alertTest === "noflow") {
-        messages.push(`
-            <div class="alert-item danger">
-                <p>🚰 No water flow detected!</p>
-            </div>
-        `);
+    // Water flow alert
+    if (
+        (pumpIsOn && Number.isFinite(flow) && flow === 0) ||
+        alertTest === "noflow"
+    ) {
+        messages.push("⚠️ Pump is ON but no water flow detected!");
     }
 
+    // Runtime test alert
     if (alertTest === "runtime") {
-        messages.push(`
-            <div class="alert-item warning">
-                <p>⏰ Pump runtime warning (DEMO)!</p>
-            </div>
-        `);
+        messages.push("⚠️ System runtime alert test!");
     }
 
-    alertBox.innerHTML = messages.length
-        ? messages.join("")
-        : `<div class="alert-item normal">
-              <p>✓ System operating normally (DEMO)</p>
-           </div>`;
-}
+    if (messages.length > 0) {
 
+        alertBox.innerHTML = messages
+            .map(message => `<div>${message}</div>`)
+            .join("");
+
+    } else if (!esp32Connected) {
+
+        alertBox.innerHTML =
+            `<div>Waiting for ESP32 connection. No live sensor data available.</div>`;
+
+    } else {
+
+        alertBox.innerHTML =
+            `<div>✓ No active alerts. System connected.</div>`;
+    }
+}
 // ==========================================
 // ALERT TEST BUTTONS
 // ==========================================
@@ -458,21 +718,43 @@ function updateDateTime() {
         });
 }
 
+
 // ==========================================
 // LAST DATA UPDATE
 // ==========================================
 
-function updateLastDataTime() {
-    document.getElementById("lastUpdate").textContent =
+function updateLastDataTime(timestamp = null) {
+
+    const element = document.getElementById("lastUpdate");
+
+    if (!element) return;
+
+    if (!Number.isFinite(timestamp)) {
+        element.textContent = "Last data update: Waiting for ESP32...";
+        return;
+    }
+
+    element.textContent =
         "Last data update: " +
-        new Date().toLocaleTimeString("en-IN");
+        new Date(timestamp).toLocaleTimeString("en-IN");
 }
 
+
+
 // ==========================================
-// RECORD AND SAVE SENSOR HISTORY
+// SAVE REAL SENSOR HISTORY
 // ==========================================
 
 function saveHistory() {
+
+    // Do not save missing sensor readings
+    if (
+        !Number.isFinite(moisture) ||
+        !Number.isFinite(temperature)
+    ) {
+        return;
+    }
+
     const label = new Date().toLocaleTimeString("en-IN", {
         hour: "2-digit",
         minute: "2-digit",
@@ -493,26 +775,7 @@ function saveHistory() {
     updateCharts();
 }
 
-// SAVE SENSOR READINGS TO FIREBASE
-async function saveToFirebase() {
-    try {
-        await push(ref(database, "sensorHistory"), {
-            timestamp: Date.now(),
-            moisture: moisture,
-            temperature: temperature,
-            humidity: humidity,
-            battery: battery,
-            flow: flow,
-            waterUsed: waterUsed,
-            pumpStatus: pumpIsOn ? "ON" : "OFF",
-            mode: currentMode
-        });
-
-        console.log("Firebase: Sensor reading saved!");
-    } catch (error) {
-        console.error("Firebase save error:", error);
-    }
-}
+SAVE SENSOR READINGS TO FIREBASE
 // ==========================================
 // CREATE CHARTS
 // ==========================================
@@ -637,57 +900,38 @@ function simulateSensorData() {
     updateLastDataTime();
 }
 
+
 // ==========================================
 // START DASHBOARD
 // ==========================================
 
 function startDashboard() {
+
+    // Connect website buttons
     connectButtons();
-    listenToFirebase();
 
-    // Restore history BEFORE creating charts
-    loadHistory();
+    // Create empty charts
+    createCharts();
 
+    // Display empty sensor values
     displayReadings();
+
+    // Display initial pump and alert status
     updatePumpStatus();
     updateAlerts();
 
+    // Start date and time
     updateDateTime();
     updateLastDataTime();
 
-    // Show previously saved history immediately
-    createCharts();
+    // Listen for actual ESP32 data from Firebase
+    listenToFirebase();
 
-    // Record a fresh demo reading
-    saveHistory();
+    // Update date and time every second
+    setInterval(updateDateTime, 1000);
 
- setInterval(updateDateTime, 1000);
-
-if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
-    setInterval(simulateSensorData, 5000);
-    setInterval(saveToFirebase, 30000);
-}
     console.log("Smart Farm dashboard started.");
 }
 
 startDashboard();
-console.log("Firebase connected successfully!");
-
-// FIREBASE CONNECTION TEST
-async function testFirebase() {
-    try {
-        await set(ref(database, "connectionTest"), {
-            status: "Connected",
-            message: "Smart Irrigation Website",
-            time: new Date().toISOString()
-        });
-
-        console.log("SUCCESS: Data sent to Firebase!");
-    } catch (error) {
-        console.error("Firebase Error:", error);
-    }
-}
-
-if (location.hostname === "127.0.0.1" || location.hostname === "localhost") {
-    testFirebase();
-}
+console.log("Firebase listener initialized.");
