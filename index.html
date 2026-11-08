@@ -22,10 +22,10 @@
             </div>
         </div>
 
-        <div class="connection">
-            <span class="dot"></span>
-            <span>DEMO MODE</span>
-        </div>
+<div class="connection" id="connectionStatus">
+    <span class="dot" id="connectionDot"></span>
+    <span id="connectionText">ESP32 DISCONNECTED</span>
+</div>
     </header>
 
     <main class="container">
@@ -47,8 +47,7 @@
                     <h3>Soil Moisture</h3>
                     <span>💧</span>
                 </div>
-               <p class="value" id="moisture">--%</p>
-
+              <p class="value" id="moisture">--</p>
 <div class="moisture-bar">
     <div class="moisture-fill" id="moistureFill"></div>
 </div>
@@ -113,7 +112,7 @@
         <!-- HISTORICAL GRAPHS -->
         <section class="charts-section">
             <h2>Historical Sensor Data</h2>
-            <p>Sample readings over time</p>
+           <p>Live sensor readings recorded over time</p>
 
             <div class="chart-card">
                 <h3>Soil Moisture History</h3>
@@ -162,25 +161,40 @@
         <button class="off-button" id="pumpOffButton">PUMP OFF</button>
     </div>
 </section>
-        <!-- SYSTEM INFORMATION -->
-        <section class="system-panel">
-            <h2>System Information</h2>
+      <!-- SYSTEM INFORMATION -->
+<section class="system-panel">
+    <h2>System Information</h2>
 
-            <div class="system-row">
-                <span>ESP32 Connection</span>
-                <strong id="espStatus">Not Connected</strong>
-            </div>
+    <div class="system-row">
+        <span>ESP32 Connection</span>
+        <strong id="espStatus">Disconnected</strong>
+    </div>
 
-            <div class="system-row">
-                <span>Operating Mode</span>
-                <strong>Demo Mode</strong>
-            </div>
+    <div class="system-row">
+        <span>Wi-Fi Network</span>
+        <strong id="wifiName">Not Connected</strong>
+    </div>
 
-            <div class="system-row">
-                <span>Data Source</span>
-                <strong>Sample Data</strong>
-            </div>
-        </section>
+    <div class="system-row">
+        <span>Wi-Fi Signal</span>
+        <strong id="wifiSignal">-- dBm</strong>
+    </div>
+
+    <div class="system-row">
+        <span>Last Heartbeat</span>
+        <strong id="lastHeartbeat">Waiting...</strong>
+    </div>
+
+    <div class="system-row">
+        <span>Operating Mode</span>
+        <strong id="systemMode">Waiting...</strong>
+    </div>
+
+    <div class="system-row">
+        <span>Data Source</span>
+        <strong id="dataSource">No Live Data</strong>
+    </div>
+</section>
 
         <!-- SYSTEM ALERTS -->
         <section class="alerts-panel">
