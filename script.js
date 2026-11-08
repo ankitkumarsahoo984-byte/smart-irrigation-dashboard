@@ -337,7 +337,10 @@ waterUsed = getNumber(data.waterUsed);
 
             moistureHistory.push(getNumber(reading.moisture));
             temperatureHistory.push(getNumber(reading.temperature));
-        });
+                });
+
+        console.log("History records loaded:", realReadings.length);
+        console.log("Moisture history:", moistureHistory);
 
         updateCharts();
 
