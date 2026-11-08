@@ -604,7 +604,6 @@ function updateAlerts() {
 
     let messages = [];
 
-    // Battery alert
     if (
         (Number.isFinite(battery) && battery < 20) ||
         alertTest === "battery"
@@ -612,7 +611,6 @@ function updateAlerts() {
         messages.push("⚠️ Low battery level!");
     }
 
-    // Dry soil alert
     if (
         (Number.isFinite(moisture) && moisture < 30) ||
         alertTest === "dry"
@@ -620,7 +618,6 @@ function updateAlerts() {
         messages.push("⚠️ Soil moisture is low!");
     }
 
-    // Water flow alert
     if (
         (pumpIsOn && Number.isFinite(flow) && flow === 0) ||
         alertTest === "noflow"
@@ -628,7 +625,6 @@ function updateAlerts() {
         messages.push("⚠️ Pump is ON but no water flow detected!");
     }
 
-    // Runtime test alert
     if (alertTest === "runtime") {
         messages.push("⚠️ System runtime alert test!");
     }
