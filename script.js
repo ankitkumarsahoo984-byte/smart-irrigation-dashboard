@@ -771,11 +771,9 @@ function saveHistory() {
     updateCharts();
 }
 
-// SAVE SENSOR READINGS TO FIREBASE
-// ==========================================
-// CREATE CHARTS
-// ==========================================
+// Firebase sensor history section
 
+// Create charts
 function createCharts() {
     if (typeof Chart === "undefined") {
         console.error("Chart.js library not loaded.");
