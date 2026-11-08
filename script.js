@@ -312,11 +312,12 @@ waterUsed = getNumber(data.waterUsed);
         const readings = Object.values(snapshot.val());
 
         // Only accept readings marked as ESP32 data
-        const realReadings = readings
-            .filter(reading =>
-                reading.source === "ESP32" &&
-                getNumber(reading.timestamp) !== null
-            )
+      const realReadings = readings
+    .filter(reading =>
+        getNumber(reading.timestamp) !== null &&
+        getNumber(reading.moisture) !== null &&
+        getNumber(reading.temperature) !== null
+    )
             .sort((a, b) =>
                 Number(a.timestamp) - Number(b.timestamp)
             )
